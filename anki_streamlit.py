@@ -45,6 +45,89 @@ def load_reviewer_prompt_template():
         st.error("Error: improved_anki_reviewer_prompt.txt file not found")
         return None
 
+def enhance_question_for_tts(question):
+    """Use LLM to enhance question with emotional elements and convert MathJax to readable text"""
+    prompt = f"""
+Add ONLY natural speech elements to make this question sound human when spoken. DO NOT change the question content or reveal any answers.
+
+STRICT RULES:
+- Add ONLY 1-2 natural speech elements: "uhh", "hmm", "well", "so", "now"
+- Convert math symbols/formulas to spoken words (e.g., "x²" → "x squared")
+- NEVER change the actual question content
+- NEVER add answers or hints
+- NEVER make it longer than the original
+- Keep the exact same meaning
+
+Question: {question}
+
+Enhanced for speech (keep question identical, just add natural speech):"""
+    
+    try:
+        response = send_chat_message(prompt, workspace_slug="anki", session_id="question-enhancer")
+        if response and response.get('textResponse'):
+            enhanced_text = response['textResponse'].strip()
+            # Remove any quotes or extra formatting
+            enhanced_text = enhanced_text.strip('"\'')
+            return enhanced_text
+        return question  # Fallback to original if enhancement fails
+    except Exception as e:
+        st.error(f"Question enhancement error: {e}")
+        return question
+
+def evaluate_answer_with_human_llm(question, correct_answer, user_answer):
+    """Use LLM to evaluate user's answer with very human-like emotional responses"""
+    prompt = f"""
+You are a very emotional, human-like tutor who gets genuinely excited when students do well and disappointed when they struggle. Evaluate the student's answer and respond with authentic human emotions.
+
+RATING SCALE:
+1 = Again (completely wrong) - Be disappointed but encouraging
+2 = Hard (partially correct) - Show mild concern but be supportive
+3 = Good (mostly correct) - Be pleased and encouraging
+4 = Easy (perfect answer) - Be EXTREMELY happy and excited!
+
+EMOTIONAL RESPONSE GUIDELINES:
+- For rating 1: Express disappointment but be encouraging. Use phrases like "Oh no...", "Hmm, that's not quite right", "Don't worry, let's try again"
+- For rating 2: Show mild concern. Use "Uhh...", "Well...", "You're getting there but..."
+- For rating 3: Be pleased! Use "Good job!", "Nice work!", "You got it mostly right!"
+- For rating 4: Be EXTREMELY excited! Use "Excellent!", "Perfect!", "Amazing!", "You nailed it!", add excitement sounds like "Wow!"
+
+Add natural speech elements like:
+- "uhh...", "hmm...", "well...", "oh!", "wow!"
+- "<laugh>", "<excited>", "<sigh>", "<pleased>"
+- Emotional reactions that match the performance
+
+Question: {question}
+Correct Answer: {correct_answer}
+Student's Answer: {user_answer}
+
+Respond with:
+Rating: [1-4]
+Emotional Response: [Your very human, emotional evaluation with natural speech elements]
+"""
+    
+    try:
+        response = send_chat_message(prompt, workspace_slug="anki", session_id="human-evaluator")
+        if response and response.get('textResponse'):
+            response_text = response['textResponse'].strip()
+            
+            # Extract rating from response
+            rating_match = re.search(r'Rating:\s*(\d)', response_text)
+            if rating_match:
+                rating = int(rating_match.group(1))
+                if 1 <= rating <= 4:
+                    return rating, response_text
+            
+            # Fallback: look for just a number
+            number_match = re.search(r'\b([1-4])\b', response_text)
+            if number_match:
+                rating = int(number_match.group(1))
+                return rating, response_text
+                
+        return 3, "Good job! <pleased> You're doing well, keep it up!"
+    except Exception as e:
+        st.error(f"Human LLM evaluation error: {e}")
+        return 3, f"Hmm... <confused> There was an issue, but you're doing fine! {e}"
+
 def send_chat_message(message, workspace_slug="anki", session_id="flashcard-generator"):
     """Send chat message to generate flashcards"""
     url = f"http://localhost:3001/api/v1/workspace/{workspace_slug}/chat"
@@ -266,29 +349,41 @@ def evaluate_answer_with_llm(question, correct_answer, user_answer):
     """Use LLM to evaluate user's answer and suggest rating"""
     prompt_template = load_reviewer_prompt_template()
     if not prompt_template:
-        # Fallback to basic prompt if file not found
+        # Fallback to human-like emotional prompt
         prompt = f"""
-You are an Anki flashcard reviewer. Compare the user's answer with the correct answer and give a rating.
+You are a very emotional, human-like tutor who gets genuinely excited when students do well and disappointed when they struggle. Evaluate the student's answer and respond with authentic human emotions.
 
 RATING SCALE:
-1 = Again (completely wrong, no answer, or totally different meaning)
-2 = Hard (partially correct but missing key parts or has major errors)
-3 = Good (mostly correct with only minor grammar/spelling mistakes)
-4 = Easy (perfect or nearly perfect answer)
+1 = Again (completely wrong) - Be disappointed but encouraging
+2 = Hard (partially correct) - Show mild concern but be supportive
+3 = Good (mostly correct) - Be pleased and encouraging
+4 = Easy (perfect answer) - Be EXTREMELY happy and excited!
+
+EMOTIONAL RESPONSE GUIDELINES:
+- For rating 1: Express disappointment but be encouraging. Use phrases like "Oh no...", "Hmm, that's not quite right", "Don't worry, let's try again"
+- For rating 2: Show mild concern. Use "Uhh...", "Well...", "You're getting there but..."
+- For rating 3: Be pleased! Use "Good job!", "Nice work!", "You got it mostly right!"
+- For rating 4: Be EXTREMELY excited! Use "Excellent!", "Perfect!", "Amazing!", "You nailed it!", add excitement sounds like "Wow!"
+
+Add natural speech elements like:
+- "uhh...", "hmm...", "well...", "oh!", "wow!"
+- "<laugh>", "<excited>", "<sigh>", "<pleased>"
+- Emotional reactions that match the performance
 
 IMPORTANT RULES:
 - Minor grammar, spelling, or word form errors should NOT lower the rating below 3
 - Focus on MEANING and KEY CONTENT, not perfect grammar
 - If the main idea is correct, rate 3 or 4
 - Only rate 1 or 2 if the answer is actually wrong or missing important information
+- Do not look for grammatical perfection, just the core understanding is enough for rating 4.
 
 Question: {question}
 Correct Answer: {correct_answer}
 User's Answer: {user_answer}
 
-Give only the rating number (1, 2, 3, or 4) and a brief reason:
-Rating: [number]
-Reason: [brief explanation focusing on content accuracy, not grammar]
+Respond with:
+Rating: [1-4]
+Reason: [Your very human, emotional evaluation with natural speech elements]
 """
     else:
         # Use the improved prompt template
@@ -420,9 +515,9 @@ elif mode == "Review Cards":
     # Review Mode Selection
     review_mode = st.radio(
         "Select Review Mode:",
-        ["🎤🔊🤖 TTS + ASR + LLM", "🎤🤖 ASR + LLM", "🔊 TTS Only"],
+        ["🎤🔊🤖 Enhanced TTS + ASR + LLM", "🎤🤖 ASR + LLM", "🔊 TTS Only"],
         horizontal=True,
-        help="Choose your preferred review experience"
+        help="Enhanced mode uses human-like speech and emotional AI evaluation"
     )
     
     st.divider()
@@ -459,6 +554,8 @@ elif mode == "Review Cards":
             st.session_state.llm_rating = None
         if 'llm_explanation' not in st.session_state:
             st.session_state.llm_explanation = ""
+        if 'enhanced_question' not in st.session_state:
+            st.session_state.enhanced_question = ""
         
         # Navigation
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -469,6 +566,7 @@ elif mode == "Review Cards":
                 st.session_state.user_spoken_answer = ""
                 st.session_state.llm_rating = None
                 st.session_state.llm_explanation = ""
+                st.session_state.enhanced_question = ""
                 st.rerun()
         
         with col2:
@@ -481,6 +579,7 @@ elif mode == "Review Cards":
                 st.session_state.user_spoken_answer = ""
                 st.session_state.llm_rating = None
                 st.session_state.llm_explanation = ""
+                st.session_state.enhanced_question = ""
                 st.rerun()
         
         # Current card
@@ -508,16 +607,31 @@ elif mode == "Review Cards":
         st.markdown("### Question")
         st.markdown(f"**{question}**")
         
+        # Show enhanced question info for Enhanced mode
+        if review_mode == "🎤🔊🤖 Enhanced TTS + ASR + LLM" and st.session_state.enhanced_question:
+            with st.expander("🤖 Enhanced Question for TTS", expanded=False):
+                st.markdown("*This is how the AI will read the question with natural speech elements:*")
+                st.markdown(f"**{st.session_state.enhanced_question}**")
+        
         # TTS for question (for TTS modes)
-        if review_mode in ["🎤🔊🤖 TTS + ASR + LLM", "🔊 TTS Only"]:
+        if review_mode in ["🎤🔊🤖 Enhanced TTS + ASR + LLM", "🔊 TTS Only"]:
             col1, col2 = st.columns([1, 4])
             with col1:
                 if st.button("🔊 Read Question", key="tts_question"):
-                    with st.spinner("Speaking question..."):
-                        text_to_speech(question)
+                    if review_mode == "🎤🔊🤖 Enhanced TTS + ASR + LLM":
+                        # Enhanced mode: Question -> LLM -> TTS
+                        with st.spinner("Enhancing question for natural speech..."):
+                            if not st.session_state.enhanced_question:
+                                st.session_state.enhanced_question = enhance_question_for_tts(question)
+                        with st.spinner("Speaking enhanced question..."):
+                            text_to_speech(st.session_state.enhanced_question)
+                    else:
+                        # Regular TTS mode
+                        with st.spinner("Speaking question..."):
+                            text_to_speech(question)
         
         # Answer input based on mode
-        if review_mode == "🎤🔊🤖 TTS + ASR + LLM":
+        if review_mode == "🎤🔊🤖 Enhanced TTS + ASR + LLM":
             # Mode 1: TTS + ASR + LLM
             st.markdown("### Your Answer (Voice)")
             col1, col2 = st.columns([1, 3])
@@ -582,7 +696,7 @@ elif mode == "Review Cards":
             st.markdown(f"**{answer}**")
             
             # TTS for answer (for TTS modes)
-            if review_mode in ["🎤🔊🤖 TTS + ASR + LLM", "🔊 TTS Only"]:
+            if review_mode in ["🎤🔊🤖 Enhanced TTS + ASR + LLM", "🔊 TTS Only"]:
                 col1, col2 = st.columns([1, 4])
                 with col1:
                     if st.button("🔊 Read Answer", key="tts_answer"):
@@ -590,13 +704,29 @@ elif mode == "Review Cards":
                             text_to_speech(answer)
             
             # Show LLM evaluation for AI modes
-            if review_mode in ["🎤🔊🤖 TTS + ASR + LLM", "🎤🤖 ASR + LLM"] and st.session_state.llm_rating:
+            if review_mode in ["🎤🔊🤖 Enhanced TTS + ASR + LLM", "🎤🤖 ASR + LLM"] and st.session_state.llm_rating:
                 st.markdown("### AI Evaluation")
                 rating_colors = {1: "🔴", 2: "🟡", 3: "🟢", 4: "🔵"}
                 rating_names = {1: "Again", 2: "Hard", 3: "Good", 4: "Easy"}
                 
                 st.markdown(f"**AI Suggested Rating:** {rating_colors.get(st.session_state.llm_rating, '⚪')} {st.session_state.llm_rating} - {rating_names.get(st.session_state.llm_rating, 'Unknown')}")
-                st.markdown(f"**Explanation:** {st.session_state.llm_explanation}")
+                st.markdown(f"**Evaluation:** {st.session_state.llm_explanation}")
+                
+                # Add TTS for human-like evaluation in Enhanced mode
+                if review_mode == "🎤🔊🤖 Enhanced TTS + ASR + LLM":
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                        if st.button("🔊 Hear Evaluation", key="tts_evaluation"):
+                            # Extract just the emotional response part for TTS
+                            evaluation_text = st.session_state.llm_explanation
+                            # Try to extract the emotional response part
+                            if "Emotional Response:" in evaluation_text:
+                                emotional_part = evaluation_text.split("Emotional Response:")[-1].strip()
+                                with st.spinner("Speaking AI's emotional evaluation..."):
+                                    text_to_speech(emotional_part)
+                            else:
+                                with st.spinner("Speaking AI evaluation..."):
+                                    text_to_speech(evaluation_text)
                 
                 # Auto-apply AI rating or manual override
                 col1, col2 = st.columns([1, 1])
@@ -608,6 +738,7 @@ elif mode == "Review Cards":
                         st.session_state.user_spoken_answer = ""
                         st.session_state.llm_rating = None
                         st.session_state.llm_explanation = ""
+                        st.session_state.enhanced_question = ""
                         time.sleep(1)
                         st.rerun()
                 
@@ -626,6 +757,7 @@ elif mode == "Review Cards":
                     st.session_state.user_spoken_answer = ""
                     st.session_state.llm_rating = None
                     st.session_state.llm_explanation = ""
+                    st.session_state.enhanced_question = ""
                     time.sleep(1)
                     st.rerun()
             
@@ -637,6 +769,7 @@ elif mode == "Review Cards":
                     st.session_state.user_spoken_answer = ""
                     st.session_state.llm_rating = None
                     st.session_state.llm_explanation = ""
+                    st.session_state.enhanced_question = ""
                     time.sleep(1)
                     st.rerun()
             
@@ -648,6 +781,7 @@ elif mode == "Review Cards":
                     st.session_state.user_spoken_answer = ""
                     st.session_state.llm_rating = None
                     st.session_state.llm_explanation = ""
+                    st.session_state.enhanced_question = ""
                     time.sleep(1)
                     st.rerun()
             
@@ -659,6 +793,7 @@ elif mode == "Review Cards":
                     st.session_state.user_spoken_answer = ""
                     st.session_state.llm_rating = None
                     st.session_state.llm_explanation = ""
+                    st.session_state.enhanced_question = ""
                     time.sleep(1)
                     st.rerun()
         
