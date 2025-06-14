@@ -1,0 +1,7 @@
+generate_flashcards_with_llm(statement)
+evaluate_answer_with_llm(question, correct_answer, user_answer)
+read_question
+record_answer
+change_of_modes
+deck_stats
+send_question_answer
