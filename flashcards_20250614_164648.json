@@ -1,0 +1,44 @@
+[
+  {
+    "question": "Backpropagation computes gradients of the loss function with respect to network weights using the chain rule.",
+    "response": "Q: What method computes gradients of the loss function with respect to network weights using the chain rule?\nA: Backpropagation.\n\nQ: According to backpropagation, how are gradients of the loss function calculated with respect to network weights?\nA: Using the chain rule.\n\nQ: What is the basis for calculating gradients of the loss function in backpropagation?\nA: The chain rule.\n\nQ: Is it true that backpropagation computes gradients of the loss function with respect to network weights using the chain rule?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 1
+  },
+  {
+    "question": "The vanishing gradient problem occurs when gradients become exponentially small in deep networks, making training difficult.",
+    "response": "Q: What problem is encountered when gradients become exponentially small in deep networks during training?\nA: The vanishing gradient problem.\n\nQ: In deep networks, what issue arises when gradients are very small?\nA: Training becomes difficult.\n\nQ: Why does the vanishing gradient problem occur in deep networks?\nA: Because gradients become exponentially small.\n\nQ: Is it true that the vanishing gradient problem occurs when gradients become exponentially small in deep networks during training?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 2
+  },
+  {
+    "question": "ReLU activation functions help mitigate the vanishing gradient problem by providing non-zero gradients for positive inputs.",
+    "response": "Q: What type of activation function helps mitigate the vanishing gradient problem?\nA: RReLU.\n\nQ: Which activation function is used to provide non-zero gradients for positive inputs?\nA: ReLU.\n\nQ: Why is a specific activation function used to provide non-zero gradients for positive inputs?\nA: To help mitigate the vanishing gradient problem.\n\nQ: Is it true that an activation function helps mitigate the vanishing gradient problem by providing non-zero gradients for positive inputs?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 3
+  },
+  {
+    "question": "Dropout randomly sets a fraction of input units to zero during training to prevent overfitting.",
+    "response": "Q: What does dropout randomly set to zero during training?\nA: A fraction of input units.\n\nQ: Why does dropout set input units to zero during training?\nA: To prevent overfitting.\n\nQ: What technique uses this method to prevent overfitting?\nA: Dropout.\n\nQ: Is it true that dropout randomly sets a fraction of input units to zero during training to prevent overfitting?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 4
+  },
+  {
+    "question": "Convolutional layers use shared weights and local connectivity to efficiently process grid-like data such as images.",
+    "response": "Q: What type of connection do convolutional layers use to process grid-like data?\nA: Shared weights and local connectivity.\n\nQ: How do convolutional layers efficiently process grid-like data?\nA: Using shared weights and local connectivity.\n\nQ: What feature helps convolutional layers efficiently process grid-like data?\nA: Local connectivity.\n\nQ: Is it true that convolutional layers use shared weights and local connectivity to efficiently process grid-like data such as images?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 5
+  },
+  {
+    "question": "LSTM networks use gating mechanisms to selectively remember and forget information over long sequences.",
+    "response": "Q: What type of mechanism do LSTM networks use to selectively remember and forget information?\nA: Gating mechanisms.\n\nQ: How do LSTM networks selectively remember and forget information?\nA: Using gating mechanisms.\n\nQ: What is the purpose of using gating mechanisms in LSTM networks?\nA: To selectively remember and forget information over long sequences.\n\nQ: Is it true that LSTM networks use gating mechanisms to selectively remember and forget information over long sequences?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 6
+  },
+  {
+    "question": "The universal approximation theorem states that feedforward networks with sufficient hidden units can approximate any continuous function.",
+    "response": "Q: What type of network can approximate any continuous function?\nA: Feedforward networks.\n\nQ: How many hidden units do feedforward networks need to be able to approximate any continuous function?\nA: Sufficient.\n\nQ: What is the condition for a feedforward network to be able to approximate any continuous function?\nA: Having sufficient hidden units.\n\nQ: Is it true that the universal approximation theorem states that feedforward networks with sufficient hidden units can approximate any continuous function?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 7
+  }
+]

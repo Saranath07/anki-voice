@@ -1,0 +1,44 @@
+[
+  {
+    "question": "Backpropagation computes gradients of the loss function with respect to network weights using the chain rule.",
+    "response": "Q: What mathematical technique is used in backpropagation to compute gradients of the loss function with respect to network weights?\nA: The chain rule.\n\nQ: In the context of neural networks, what specific method is employed by backpropagation to iteratively update network weights based on computed gradients?\nA: Backpropagation.\n\nQ: Which fundamental principle underlies the use of backpropagation in optimizing deep learning models?\nA: Gradient descent.\n\nQ: Is it true that backpropagation relies on the application of the chain rule to efficiently compute gradients of the loss function with respect to network weights during training?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 1
+  },
+  {
+    "question": "The vanishing gradient problem occurs when gradients become exponentially small in deep networks, making training difficult.",
+    "response": "Q: What issue arises when training neural networks with multiple layers due to the nature of backpropagation?\nA: The vanishing gradient problem.\n\nQ: According to computational complexity theory, what phenomenon causes gradients in deep networks to diminish rapidly as they are propagated backwards through the network?\nA: Exponential decay.\n\nQ: In the context of neural network optimization, what challenge does the vanishing gradient problem pose when updating weights using stochastic gradient descent or similar methods?\nA: Difficulty in convergence and training stability.\n\nQ: Is it true that gradients become exponentially small in deep networks due to a fundamental limitation in the backpropagation algorithm used for training neural networks?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 2
+  },
+  {
+    "question": "ReLU activation functions help mitigate the vanishing gradient problem by providing non-zero gradients for positive inputs.",
+    "response": "Q: What type of activation function is specifically designed to address the issue of vanishing gradients in deep neural networks?\nA: ReLU.\n\nQ: According to its mathematical definition, what characteristic of the ReLU activation function allows it to provide non-zero gradients for positive inputs?\nA: The output remains zero only when the input is negative.\n\nQ: In contrast to other activation functions, why does ReLU help mitigate the vanishing gradient problem in neural networks?\nA: By ensuring that the network receives a non-zero gradient signal even when the input is positive.\n\nQ: Is it true that the primary benefit of using the ReLU activation function in deep neural networks lies in its ability to provide non-zero gradients for positive inputs, thereby mitigating the vanishing gradient problem?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 3
+  },
+  {
+    "question": "Dropout randomly sets a fraction of input units to zero during training to prevent overfitting.",
+    "response": "Q: What regularization technique is employed by dropout to counteract overfitting in neural networks?\nA: Regularization through random set-out.\n\nQ: According to its implementation, what effect does dropout have on the output of a neuron when applying this regularization technique during training?\nA: The neuron's output is dropped to zero with a specified probability.\n\nQ: In the context of neural network optimization, why is dropout used as an alternative to other regularization methods such as L1 and L2 regularization?\nA: To prevent overfitting by randomly dropping out neurons during training.\n\nQ: Is it true that dropout helps prevent overfitting in neural networks by randomly setting a fraction of input units to zero during training?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 4
+  },
+  {
+    "question": "Convolutional layers use shared weights and local connectivity to efficiently process grid-like data such as images.",
+    "response": "Q: What type of neural network architecture is characterized by using shared weights and local connectivity?\nA: Convolutional.\n\nQ: According to its design, what property does a convolutional layer utilize when processing grid-like data such as images?\nA: Efficient spatial locality.\n\nQ: In the context of deep learning models, how do convolutional layers facilitate efficient processing of image data in comparison to other types of neural networks?\nA: Through shared weights and local connectivity.\n\nQ: Is it true that convolutional layers employ a strategy involving shared weights and localized connectivity to process grid-like data such as images efficiently?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 5
+  },
+  {
+    "question": "LSTM networks use gating mechanisms to selectively remember and forget information over long sequences.",
+    "response": "Q: What type of neural network architecture employs gating mechanisms to control information flow during sequence processing?\nA: Long Short-Term Memory (LSTM) networks.\n\nQ: According to its design, what is the primary function of the gate in an LSTM network when selectively remembering or forgetting information over long sequences?\nA: Information recall or forgetting.\n\nQ: In the context of deep learning models, how do LSTM networks utilize gating mechanisms to adaptively control the flow of information during sequence processing?\nA: By selectively retaining and discarding information as needed.\n\nQ: Is it true that LSTM networks use gating mechanisms to dynamically adjust their capacity for storing and retrieving information over long sequences?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 6
+  },
+  {
+    "question": "The universal approximation theorem states that feedforward networks with sufficient hidden units can approximate any continuous function.",
+    "response": "Q: What type of neural network architecture is capable of approximating any continuous function, according to the universal approximation theorem?\nA: Feedforward networks.\n\nQ: According to the universal approximation theorem, what property must a feedforward network possess in order to approximate any continuous function?\nA: Sufficient hidden units.\n\nQ: In the context of deep learning models, how does the universal approximation theorem impact the design and architecture of neural networks?\nA: It provides a theoretical basis for constructing neural networks that can effectively approximate complex functions.\n\nQ: Is it true that feedforward networks with sufficient hidden units can be used to approximate any continuous function, as stated by the universal approximation theorem?\nA: Yes.",
+    "category": "deep_learning",
+    "fact_number": 7
+  }
+]

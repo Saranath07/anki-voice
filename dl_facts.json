@@ -1,0 +1,15 @@
+{
+  
+  "deep_learning": [
+    "Backpropagation computes gradients of the loss function with respect to network weights using the chain rule.",
+    "The vanishing gradient problem occurs when gradients become exponentially small in deep networks, making training difficult.",
+    "ReLU activation functions help mitigate the vanishing gradient problem by providing non-zero gradients for positive inputs.",
+    "Dropout randomly sets a fraction of input units to zero during training to prevent overfitting.",
+    "Convolutional layers use shared weights and local connectivity to efficiently process grid-like data such as images.",
+    "LSTM networks use gating mechanisms to selectively remember and forget information over long sequences.",
+    "The universal approximation theorem states that feedforward networks with sufficient hidden units can approximate any continuous function."
+
+  ]
+
+  
+}
