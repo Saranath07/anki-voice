@@ -1,5 +1,7 @@
 # 🎯 Anki Voice: AI-Powered Conversational Learning System
 
+Video Link : https://youtu.be/O80S3dhMAPc?si=NtkQpL9oOPZf9V86
+
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
@@ -244,3 +246,5 @@ MIT License - Build the future of learning with us.
 **Built with ❤️ for learners who refuse to settle for ordinary.**
 
 *"The best way to learn is to teach. The best way to teach is to make it feel like magic."* - Anki Voice Team
+
+Video Link : https://youtu.be/O80S3dhMAPc?si=NtkQpL9oOPZf9V86
