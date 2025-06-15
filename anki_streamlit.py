@@ -6,7 +6,6 @@ import ast
 import re
 from datetime import datetime
 import speech_recognition as sr
-import pyttsx3
 import tempfile
 import os
 import threading
@@ -306,22 +305,66 @@ def get_num_reviewed_today():
 
 # TTS and ASR Functions
 def text_to_speech(text):
-    """Convert text to speech using pyttsx3"""
+    """Convert text to speech using external TTS API"""
     try:
-        engine = pyttsx3.init()
-        voices = engine.getProperty('voices')
-        if voices:
-            engine.setProperty('voice', voices[0].id)
-        engine.setProperty('rate', 200)
-        engine.say(text)
-        engine.runAndWait()
-        return True
+        # Prepare payload for the TTS API
+        payload = {
+            "input": text,
+            "model": "orpheus",
+            "voice": "tara",
+            "response_format": "wav",
+            "speed": 1
+        }
+        
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        
+        # Make request to TTS API
+        response = requests.post(
+            'http://localhost:5005/v1/audio/speech',
+            json=payload,
+            headers=headers,
+            timeout=100000
+        )
+        
+        if response.status_code == 200:
+            # Create a temporary file for the audio
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
+            temp_file_path = temp_file.name
+            temp_file.close()
+            
+            # Save the audio content to the temporary file
+            with open(temp_file_path, 'wb') as f:
+                f.write(response.content)
+            
+            # Play the audio file using Streamlit's audio widget
+            with open(temp_file_path, 'rb') as audio_file:
+                audio_bytes = audio_file.read()
+                st.audio(audio_bytes, format='audio/wav')
+            
+            # Clean up the temporary file
+            os.unlink(temp_file_path)
+            
+            st.success("🔊 Audio generated successfully!")
+            return True
+        else:
+            st.error(f"TTS API Error: HTTP {response.status_code} - {response.text}")
+            return False
+            
+    except requests.exceptions.ConnectionError:
+        st.error("Could not connect to TTS service at http://localhost:5005")
+        return False
+    except requests.exceptions.Timeout:
+        st.error("TTS API request timed out")
+        return False
     except Exception as e:
         st.error(f"TTS Error: {e}")
         return False
 
 def speech_to_text():
-    """Convert speech to text using speech_recognition"""
+    """Convert speech to text using external ASR API"""
     try:
         r = sr.Recognizer()
         with sr.Microphone() as source:
@@ -330,16 +373,38 @@ def speech_to_text():
             audio = r.listen(source, timeout=10, phrase_time_limit=10)
             
         st.info("🔄 Processing speech...")
-        text = r.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        st.error("❌ Could not understand the audio")
-        return None
-    except sr.RequestException as e:
-        st.error(f"❌ Speech recognition error: {e}")
-        return None
+        
+        # Save audio to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
+            temp_audio.write(audio.get_wav_data())
+            temp_audio_path = temp_audio.name
+        
+        try:
+            # Send audio to external ASR API
+            with open(temp_audio_path, 'rb') as audio_file:
+                files = {'audio': audio_file}
+                response = requests.post('http://localhost:5000/transcribe', files=files)
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('status') == 'success':
+                    return result.get('transcript')
+                else:
+                    st.error(f"❌ ASR API Error: {result.get('message', 'Unknown error')}")
+                    return None
+            else:
+                st.error(f"❌ ASR API Error: HTTP {response.status_code}")
+                return None
+                
+        finally:
+            # Clean up temporary file
+            os.unlink(temp_audio_path)
+            
     except sr.WaitTimeoutError:
         st.error("❌ No speech detected within timeout")
+        return None
+    except requests.exceptions.ConnectionError:
+        st.error("❌ Could not connect to ASR service at http://localhost:5000")
         return None
     except Exception as e:
         st.error(f"❌ ASR Error: {e}")
@@ -538,6 +603,7 @@ elif mode == "Review Cards":
         
         # Get card information
         cards = get_cards_info(all_review_card_ids) if all_review_card_ids else []
+        st.write(cards)
     
     # Show what we found
     st.info(f"Found {len(due_card_ids)} due cards, {len(new_card_ids)} new cards, {len(cards)} total cards for review")
